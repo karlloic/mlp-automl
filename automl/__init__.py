@@ -3,11 +3,16 @@ from flask_restful import Api
 from .resources import DataSet
 
 
+UPLOAD_FOLDER = '../data'
+
 # Init a Flask app instance
 app = Flask(__name__)
 
+# Config
+# app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-@app.route('/index')
+
+@app.route('/index', methods=['GET', 'POST'])
 def index():
     return jsonify(
         hello='AutoML'
