@@ -1,15 +1,13 @@
 from flask import Flask, jsonify
 from flask_restful import Api
-from .resources import DataSet
+from .resources import Job, UPLOAD_FOLDER
 
-
-UPLOAD_FOLDER = '../data'
 
 # Init a Flask app instance
 app = Flask(__name__)
 
 # Config
-# app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
 @app.route('/index', methods=['GET', 'POST'])
@@ -21,7 +19,7 @@ def index():
 
 # Add REST resources to the micro service
 api = Api(app)
-api.add_resource(DataSet, '/dataset/eda')
+api.add_resource(Job, '/job/', '/job/<int:jobid>')
 
 
 if __name__ == '__main__':
