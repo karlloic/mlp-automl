@@ -31,6 +31,7 @@ From project root dir, install dependencies with
 `pip install -r requirements.txt`
 
 ## Run web service
+- Input data files can be found in the dir: `sample_data`
 - Make sure the package `gunicorn' is installed
 - Navigate to root directory
 - Start the webservice with `gunicorn automl:app`
