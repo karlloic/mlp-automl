@@ -24,6 +24,11 @@ Later, to deactivate venv run
 
 `deactivate`
 
+### Redis Message Broker
+Install the message broker Redis following instructions here:
+
+`https://redis.io/download`
+
 ### Package dependencies
 
 From project root dir, install dependencies with 
@@ -34,7 +39,10 @@ From project root dir, install dependencies with
 - Input data files can be found in the dir: `sample_data`
 - Make sure the package `gunicorn' is installed
 - Navigate to root directory
-- Start the webservice with `gunicorn automl:app`
+- Open three terminal tabs and activate venv in each
+- Start the webservice with `gunicorn automl:app` one terminal
 - Test that the service works by navigting to `localhost:8000/index`
-- Start a new job with `curl -XPOST -F 'data=@<path-to-data-file>/iris.data.txt' -F 'target=@<path-to-dataset-dependent-variable-file>/iris.target.txt' localhost:8000/job/`
+- Start redis server with `src/redis-server` in 2nd terminal
+- Start celery worker in last terminal tab with `celery worker -A automl.celery --loglevel=inf`
+- Create a new job with `curl -XPOST -F 'data=@<path-to-data-file>/iris.data.txt' -F 'target=@<path-to-dataset-dependent-variable-file>/iris.target.txt' localhost:8000/job/`
 - Download job results from browser with `localhost:8000/job/<jobid>`

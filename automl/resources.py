@@ -1,18 +1,18 @@
 import os
 import flask_restful
-import pandas as pd
 from flask import request, send_from_directory, jsonify
 from werkzeug.utils import secure_filename
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
+from .tasks import *
 
-ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../'))
-UPLOAD_FOLDER = ROOT_DIR + '/data/'
 
-# Will be used to store jobs and generate job ids
+# Will be used to store jobs and generate job ids. AKA our database
 jobs = {}
-job_count = 0
+
+response = {
+    'jobid': -1,
+    'status': 202,
+    'message': ' successfully uploaded and job started.'
+}
 
 
 class Job(flask_restful.Resource):
@@ -21,84 +21,94 @@ class Job(flask_restful.Resource):
     """
 
     def __init__(self):
-        global job_count
 
         # Only create new job if POST
         if request.method == 'POST':
-            job_count += 1
-            self.jobid = job_count
-            self.dataset = {
-                'data': None,
-                'target': None,
-                'data_filename': None,
-                'target_filename': None
-            }
-            self.output_path = None
+            self.jobid = None
+            self.data_path = None
+            self.target_path = None
+            self.result = {}
 
     def get(self, jobid):
-        global jobs
+        global jobs, response
 
+        response['status'] = 404
+        response['message'] = 'No job with jobid {} found. Create a job first'.format(jobid)
+
+        # Check status of celery task
+        task = eda.AsyncResult(jobid)
+        state = task.state
+
+        if state == states.SUCCESS:
+            self.result = task.get()
+            jobs[jobid] = self.result
+        elif state == states.PENDING:
+            response['status'] = 202
+            response['message'] = 'Job not complete.'
+            return jsonify(response)
+        elif state == states.FAILURE:
+            try:
+                response['status'] = 400
+                response['message'] = task.info.get('error')
+            except:
+                response['message'] = 'Job failed. Unknown error occurred.'
+                return jsonify(response)
+
+        # TODO Returns only pairplot for now. TO generalize
+        # If job was successful,
         try:
-            output_filename = jobs[jobid].split('/')[-1]
+            output_filename = jobs[jobid]['pairplot'].split('/')[-1]
         except KeyError:
-            print('No job with jobid {} found. Create a job first'.format(jobid))
+            return jsonify(response)
             pass
 
-        return send_from_directory(UPLOAD_FOLDER, output_filename, mimetype='image/png', as_attachment=True)
+        return send_from_directory(DATA_DIR, output_filename, mimetype='image/png', as_attachment=True)
 
     def post(self):
-        datafile_path, targetfile_path = self._loadfiles()
+        global response
 
-        self.dataset['data'] = pd.read_csv(datafile_path, header=None)
-        self.dataset['target'] = pd.read_csv(targetfile_path, header=None)
+        # Load data files
+        try:
+            self.data_path, self.target_path = self._uploadfiles()
+            response['message'] = self.data_path.split('/')[-1] + response['message']
+        except ValueError:  # None returned for unsuccessful file load
+            response['status'] = 400
+            response['message'] = 'Failed to upload data file. Job canceled.'
+            return jsonify(response)
 
-        # Plot
-        self._pairplot()
-
-        response = {
-            'jobid': self.jobid,
-            'status': 202,
-            'message': datafile_path.split('/')[-1] + ' successfully uploaded and job started.'
-        }
+        # Send EDA task to celery if files succefully uploaded
+        task = eda.apply_async(args=[self.data_path], countdown=60)
+        response['jobid'] = task.task_id
 
         return jsonify(response)
 
-    def _describe(self):
-        pass
-
-    def _pairplot(self):
-        global jobs
-
-        pd.plotting.scatter_matrix(self.dataset['data'], figsize=(15, 15), marker='o',
-                                   hist_kwds={'bins': 20}, s=60, alpha=.8)
-
-        self.output_path = UPLOAD_FOLDER + self.dataset['data_filename'].split('.')[0] + '_pairplot.png'
-        plt.savefig(self.output_path, format='png')
-
-        # Register job in global dict
-        jobs[self.jobid] = self.output_path
-
-    def _loadfiles(self):
+    def _uploadfiles(self):
         if 'data' and 'target' not in request.files:
             return 'No data or target file path'
 
         datafile = request.files['data']
         targetfile = request.files['target']
 
-        self.dataset['data_filename'] = data_filename = secure_filename(datafile.filename)
-        self.dataset['target_filename'] = target_filename = secure_filename(targetfile.filename)
+        data_filename = secure_filename(datafile.filename)
+        target_filename = secure_filename(targetfile.filename)
 
         if data_filename == '' or target_filename == '':
             return 'No data or target selected'
 
-        datafile_path = os.path.join(UPLOAD_FOLDER, data_filename)
-        targetfile_path = os.path.join(UPLOAD_FOLDER, target_filename)
+        datafile_path = os.path.join(DATA_DIR, data_filename)
+        targetfile_path = os.path.join(DATA_DIR, target_filename)
 
         if datafile and targetfile and data_filename and target_filename:
-            if not os.path.exists(UPLOAD_FOLDER):
-                os.mkdir(UPLOAD_FOLDER)
-            datafile.save(datafile_path)
-            targetfile.save(targetfile_path)
+            if not os.path.exists(DATA_DIR):
+                os.mkdir(DATA_DIR)
+
+            # Save dataset locally
+            try:
+                datafile.save(datafile_path)
+                targetfile.save(targetfile_path)
+            except IOError as e:
+                print('Unable to save dataset.')
+                print(e)
+                return None
 
         return datafile_path, targetfile_path
-
