@@ -79,7 +79,9 @@ ui <- fluidPage(
     mainPanel(
       
       # Output: Data file ----
-      tableOutput("contents")
+      tableOutput("contents"),
+      
+      tags$a(href="www.abc.com", "Proceed to Download")
       
     )
     
