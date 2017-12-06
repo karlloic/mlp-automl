@@ -41,7 +41,7 @@ From project root dir, install dependencies with
 - Navigate to root directory
 - Open three terminal tabs and activate venv in each
 - Start the webservice with `gunicorn automl:app` one terminal
-- Test that the service works by navigting to `localhost:8000/index`
+- Test that the service works by navigting to `localhost:8000/`
 - Start redis server with `src/redis-server` in 2nd terminal
 - Start celery worker in last terminal tab with `celery worker -A automl.celery --loglevel=inf`
 - Create a new job with `curl -XPOST -F 'data=@<path-to-data-file>/iris.data.txt' -F 'target=@<path-to-dataset-dependent-variable-file>/iris.target.txt' localhost:8000/job/`
