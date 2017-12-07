@@ -1,14 +1,12 @@
 lrPredict<- function(model,newdata)
 {
 
-  pred <- predict(model, newdata)
+  lrpred <- predict(model, newdata)
+
+  lrpredDf <- data.frame(newdata$Y,lrpred)
   
-  pred <<- pred
+  names( lrpredDf) <- c('ACTUAL','PREDICTED')
   
-  predDf <- data.frame(newdata$Y,pred)
-  
-  names( predDf) <- c('ACTUAL','PREDICTED')
-  
-  predDf <<- predDf
+  return(lrpredDf)
 
 }
