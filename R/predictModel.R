@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 RegClasPredict<- function(model,newdata,ModelName)
 {
 
@@ -29,3 +30,17 @@ RegClasPredict<- function(model,newdata,ModelName)
   
 
 }
+=======
+lrPredict<- function(model,newdata)
+{
+
+  lrpred <- predict(model, newdata)
+
+  lrpredDf <- data.frame(newdata$Y,lrpred)
+  
+  names( lrpredDf) <- c('ACTUAL','PREDICTED')
+  
+  return(lrpredDf)
+
+}
+>>>>>>> bc28899e605107311130461ad3e61a6fe6dda584

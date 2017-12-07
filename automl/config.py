@@ -4,7 +4,7 @@ import os
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../'))
 DATA_DIR = ROOT_DIR + '/data/'
 
-config = {
+configs = {
     'production': 'automl.config.ProductionConfig',
     'testing': 'automl.config.TestingConfig',
     'dev': 'automl.config.DevelopmentConfig',
@@ -32,11 +32,12 @@ class BaseConfig:
 
     # Set mail-related config values
     SECURITY_EMAIL_SENDER = 'yongn.kamdem@gmail.com'
-    MAIL_SERVER = 'email-smtp.us-west-2.amazonaws.com'
-    MAIL_PORT = 465
-    MAIL_USE_SSL = True
+    MAIL_SERVER = 'smtp.gmail.com'
+    MAIL_PORT = 587
+    MAIL_USE_TLS = True
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
+    MAIL_DEFAULT_SENDER = 'yongn.kamdem@gmail.com'
 
     # Celery & Redis config
     CELERY_BROKER_URL = 'redis://localhost:6379/0'
@@ -70,11 +71,12 @@ class ProductionConfig(BaseConfig):
         # Add additional configs
 
 
-def configure_app(app):
+def configure_app(app=None, config=None):
     config_name = os.getenv('FLASK_CONFIGURATION_MODE', 'dev')
-    app.config.from_object(config[config_name])  # object-based default configuration
-    app.config.from_pyfile('config.cfg', silent=True)  # instance-folders configuration
-
-    return app
+    if app is not None:
+        app.config.from_object(configs[config_name])  # object-based default configuration
+        # app.config.from_pyfile('config.cfg', silent=True)  # instance-folders configuration
+    elif config is not None:
+        config.from_object(configs[config_name])
 
 

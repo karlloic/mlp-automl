@@ -2,7 +2,9 @@ import os
 import flask_restful
 from flask import request, send_from_directory, jsonify
 from werkzeug.utils import secure_filename
-from .tasks import *
+from celery import states
+from .config import DATA_DIR
+from .tasks import eda
 
 
 # Will be used to store jobs and generate job ids. AKA our database
@@ -77,7 +79,7 @@ class Job(flask_restful.Resource):
             return jsonify(response)
 
         # Send EDA task to celery if files succefully uploaded
-        task = eda.apply_async(args=[self.data_path], countdown=60)
+        task = eda.apply_async(args=[self.data_path], countdown=5)
         response['jobid'] = task.task_id
 
         return jsonify(response)
