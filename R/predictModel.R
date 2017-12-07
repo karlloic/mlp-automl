@@ -1,14 +1,31 @@
-lrPredict<- function(model,newdata)
+RegClasPredict<- function(model,newdata,ModelName)
 {
 
-  pred <- predict(model, newdata)
+  if ( ModelName == 'LinearRegression') {
+    
+  lrpred <- predict(model, newdata)
   
-  pred <<- pred
+  lrpredDf <- data.frame(newdata$Y,lrpred)
   
-  predDf <- data.frame(newdata$Y,pred)
+  names( lrpredDf) <- c('ACTUAL','PREDICTED')
   
-  names( predDf) <- c('ACTUAL','PREDICTED')
+  return(lrpredDf)
   
-  predDf <<- predDf
+  }
+  
+  else if( ModelName == 'LogisticRegression')
+  {
+    
+    logrpred <- predict(model, newdata,type="response")
+
+    logrpredDf <- data.frame(newdata$Y,logrpred)
+    
+    names( logrpredDf) <- c('ACTUAL','PREDICTED')
+    
+    return(logrpredDf)
+    
+  }
+  
+  
 
 }
