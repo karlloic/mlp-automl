@@ -1,7 +1,6 @@
 CalcDscrStatsInt <- function( data)
   
 {
-  library(stargazer)
   
   DescriptiveStats <- function(x){
     
@@ -49,7 +48,12 @@ CalcDscrStatsInt <- function( data)
                              "Quartile_0","Quartile_25","Quartile_50","Quartile_75","Qurntile_100",
                              "Inter_Quartile_Range","Outlier_Range_Low","Outlier_Range_High", "Number_Of_Outliers")
   
-  library(dplyr)
+	if(!require(dplyr)){
+	  install.packages("dplyr")
+	  library(dplyr)
+	}
+
+
 
   
   DscrpStatsInt <- subset(DscrpStats,DscrpStats[,1] == "integer")
