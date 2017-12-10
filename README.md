@@ -1,5 +1,8 @@
 # mlp-automl
-AutoML project for ML Products class
+AutoML project for ML Products for Data Science
+
+# Instructions for Adam Kelleher
+All the code for the MVP is under `R` directory
 
 ## Python version
 For best results use Python 3.x
