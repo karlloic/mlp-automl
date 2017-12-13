@@ -1,9 +1,24 @@
 # mlp-automl
-AutoML project for ML Products for Data Science
+AutoML project for ML Products for Data Science. 
+This tool allows users to upload datasets and with one click, perform
+- Descriptive Statistical analyses
+- Train different models and
+- Evaluate the trained models using AUC
 
 # Instructions for Adam Kelleher
-All the code for the MVP is under `R` directory
+All the code for the project is under `R` directory
 
+## Project Structure
+
+We used R and Shiny for this project. All files are located under 
+the `R` directory. The `shiny.R` file is our app entry point as well as 
+the dashboard. We have separated model training, prediction and evaluation
+into different services. As well as computing descriptive statistics and 
+preprocessing the data.
+
+To run the application, simply clone the repo and launch `shiny.R` 
+
+# mlp-automl python version
 ## Python version
 For best results use Python 3.x
 
