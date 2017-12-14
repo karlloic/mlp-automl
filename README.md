@@ -1,4 +1,4 @@
-# mlp-automl
+# mlp-automl R version
 AutoML project for ML Products for Data Science. 
 This tool allows users to upload datasets and with one click, perform
 - Descriptive Statistical analyses
@@ -6,7 +6,7 @@ This tool allows users to upload datasets and with one click, perform
 - Evaluate the trained models using AUC
 
 # Instructions for Adam Kelleher
-All the code for the project is under `R` directory
+All the code for the R project is under `R` directory
 
 ## Project Structure
 
@@ -19,6 +19,9 @@ preprocessing the data.
 To run the application, simply clone the repo and launch `shiny.R` 
 
 # mlp-automl python version
+Rest API that allows users to upload datasets and perform some statistical
+analyses, plot a pairplot and evaluate (AUC) a machine learning model.
+
 ## Python version
 For best results use Python 3.x
 
@@ -53,7 +56,7 @@ From project root dir, install dependencies with
 
 `pip install -r requirements.txt`
 
-## Run web service
+## REST Call to the web service
 - Input data files can be found in the dir: `sample_data`
 - Make sure the package `gunicorn' is installed
 - Navigate to root directory
@@ -63,4 +66,5 @@ From project root dir, install dependencies with
 - Start redis server with `src/redis-server` in 2nd terminal
 - Start celery worker in last terminal tab with `celery worker -A automl.celery --loglevel=inf`
 - Create a new job with `curl -XPOST -F 'data=@<path-to-data-file>/iris.data.txt' -F 'target=@<path-to-dataset-dependent-variable-file>/iris.target.txt' localhost:8000/job/`
+  The app returns a jobid which will be used to download the results
 - Download job results from browser with `localhost:8000/job/<jobid>`
